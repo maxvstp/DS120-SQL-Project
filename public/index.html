@@ -1,12 +1,370 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="index.js" defer></script>
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DMPCS Thesis Database & Research Tracking System | UP Mindanao</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="index.js" defer></script>
 </head>
 <body>
-    
+
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <img src="images/upmin_logo.png" alt="UP Mindanao Seal" class="nav-logo round-logo">
+        <img src="images/dmpcs_logo.png" alt="DMPCS Logo" class="nav-logo round-logo">
+        <div class="brand-text">
+          <span class="brand-title">DMPCS Research Archive</span>
+          <span class="brand-subtitle">University of the Philippines Mindanao</span>
+        </div>
+      </div>
+
+      <ul class="nav-links">
+        <li><button class="nav-btn active" data-tab="repository">Repository &amp; Search</button></li>
+        <li><button class="nav-btn" data-tab="submit">Submit Thesis</button></li>
+        <li><button class="nav-btn" data-tab="analytics">Research Tracking</button></li>
+        <li>
+          <button class="nav-btn admin-tab-btn" data-tab="admin">
+            Admin Verification <span id="pending-badge" class="badge">0</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO BANNER USING YOUR HEADER IMAGE -->
+  <header class="hero-banner">
+    <div class="hero-overlay">
+      <div class="hero-content">
+        <span class="hero-tag">College of Science and Mathematics</span>
+        <h1>Centralized Thesis Database &amp; Research Tracking System</h1>
+        <p>Explore completed undergraduate theses, verify topic originality, and track research trends across BS Computer Science, BS Applied Mathematics, and BS Data Science.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+
+    <!-- =========================================================
+         TAB 1: PUBLIC THESIS REPOSITORY & DUPLICATE CHECKER
+    ========================================================== -->
+    <section id="tab-repository" class="tab-section active">
+      
+      <!-- Topic Uniqueness / Duplicate Checker Box -->
+      <div class="card uniqueness-card">
+        <div class="card-header-row">
+          <div>
+            <h2>Topic Uniqueness &amp; Overlap Checker</h2>
+            <p class="muted-text">Planning a thesis? Enter your proposed title or core keywords to check for existing studies in DMPCS.</p>
+          </div>
+        </div>
+        <div class="uniqueness-bar">
+          <input type="text" id="uniqueness-input" placeholder="e.g., Machine Learning for Dengue Forecasting in Davao City...">
+          <button type="button" id="check-uniqueness-btn" class="btn btn-primary">Check Overlap</button>
+          <button type="button" id="clear-uniqueness-btn" class="btn btn-outline hidden">Reset</button>
+        </div>
+        <div id="uniqueness-result" class="uniqueness-result hidden"></div>
+      </div>
+
+      <!-- Search & Multi-Filter Controls -->
+      <div class="card filter-card">
+        <div class="filter-grid">
+          <div class="form-group">
+            <label for="search-query">Keyword / Title / Author</label>
+            <input type="text" id="search-query" placeholder="Search title, abstract, keyword, or student...">
+          </div>
+          <div class="form-group">
+            <label for="filter-program">Degree Program</label>
+            <select id="filter-program">
+              <option value="all">All DMPCS Programs</option>
+              <option value="BS Computer Science">BS Computer Science</option>
+              <option value="BS Applied Mathematics">BS Applied Mathematics</option>
+              <option value="BS Data Science">BS Data Science</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="filter-area">Research Area</label>
+            <select id="filter-area">
+              <option value="all">All Research Areas</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="filter-year">Academic Year</label>
+            <select id="filter-year">
+              <option value="all">All Academic Years</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Count & Thesis Cards Grid -->
+      <div class="results-header">
+        <h3 id="results-count">Showing Approved Theses</h3>
+      </div>
+      <div id="thesis-grid" class="thesis-grid"></div>
+    </section>
+
+
+    <!-- =========================================================
+         TAB 2: STUDENT THESIS SUBMISSION FORM (MAPS TO SCHEMA.SQL)
+    ========================================================== -->
+    <section id="tab-submit" class="tab-section">
+      <div class="card form-card">
+        <div class="section-title-block">
+          <h2>Submit Thesis Record for Archiving</h2>
+          <p class="muted-text">All student-submitted entries are tagged as <strong>Pending Verification</strong> and reviewed by a DMPCS administrator before appearing in the public archive.</p>
+        </div>
+
+        <form id="thesis-submit-form">
+          <!-- 1. Core Thesis Details (Table: Thesis & Academic_Year) -->
+          <fieldset class="form-section">
+            <legend>1. Manuscript Details</legend>
+            <div class="form-group">
+              <label for="thesis-title">Thesis Title <span class="req">*</span></label>
+              <input type="text" id="thesis-title" name="title" maxlength="500" required placeholder="Enter exact approved manuscript title">
+            </div>
+
+            <div class="form-group">
+              <label for="thesis-abstract">Abstract <span class="req">*</span></label>
+              <textarea id="thesis-abstract" name="abstract" rows="5" required placeholder="Paste the full thesis abstract..."></textarea>
+            </div>
+
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="academic-year">Academic Year <span class="req">*</span></label>
+                <input type="text" id="academic-year" name="academic_year" placeholder="e.g., 2025-2026" maxlength="9" required>
+              </div>
+              <div class="form-group">
+                <label for="semester">Semester <span class="req">*</span></label>
+                <select id="semester" name="semester" required>
+                  <option value="1st Semester">1st Semester</option>
+                  <option value="2nd Semester" selected>2nd Semester</option>
+                  <option value="Midyear">Midyear</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="submission-date">Submission / Defense Date <span class="req">*</span></label>
+                <input type="date" id="submission-date" name="submission_date" required>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="thesis-stage">Thesis Stage <span class="req">*</span></label>
+                <select id="thesis-stage" name="stage_name" required>
+                  <option value="Proposal">Proposal</option>
+                  <option value="Final Defense" selected>Final Defense</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="research-area">Primary Research Area <span class="req">*</span></label>
+                <input type="text" id="research-area" name="research_area_name" placeholder="e.g., Artificial Intelligence, Mathematical Modeling, Epidemiology" required>
+              </div>
+            </div>
+
+            <!-- Research Classification Tags (Tables: Topic, Methodology, Keyword) -->
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="thesis-topics">Topics (comma-separated)</label>
+                <input type="text" id="thesis-topics" name="topics" placeholder="e.g., Predictive Analytics, Public Health">
+              </div>
+              <div class="form-group">
+                <label for="thesis-methodologies">Methodologies (comma-separated)</label>
+                <input type="text" id="thesis-methodologies" name="methodologies" placeholder="e.g., Random Forest, SIR Model">
+              </div>
+              <div class="form-group">
+                <label for="thesis-keywords">Keywords (comma-separated)</label>
+                <input type="text" id="thesis-keywords" name="keywords" placeholder="e.g., dengue, forecasting, Davao">
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- 2. Student Authors (Tables: Student & Thesis_Student) -->
+          <fieldset class="form-section">
+            <div class="fieldset-header">
+              <legend>2. Student Author(s)</legend>
+              <button type="button" id="add-author-btn" class="btn btn-sm btn-outline">+ Add Co-Author</button>
+            </div>
+            <div id="authors-container">
+              <div class="dynamic-row author-row">
+                <div class="form-group">
+                  <label>First Name <span class="req">*</span></label>
+                  <input type="text" name="author_first_name[]" placeholder="Juan" required>
+                </div>
+                <div class="form-group">
+                  <label>Last Name <span class="req">*</span></label>
+                  <input type="text" name="author_last_name[]" placeholder="Dela Cruz" required>
+                </div>
+                <div class="form-group">
+                  <label>Degree Program <span class="req">*</span></label>
+                  <select name="author_program[]" required>
+                    <option value="BS Computer Science">BS Computer Science</option>
+                    <option value="BS Applied Mathematics">BS Applied Mathematics</option>
+                    <option value="BS Data Science">BS Data Science</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>UP Email (Optional)</label>
+                  <input type="email" name="author_email[]" placeholder="jdelacruz@up.edu.ph">
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- 3. Faculty Committee (Tables: Faculty, Role, Thesis_Faculty) -->
+          <fieldset class="form-section">
+            <div class="fieldset-header">
+              <legend>3. Faculty Adviser &amp; Panel Committee</legend>
+              <button type="button" id="add-faculty-btn" class="btn btn-sm btn-outline">+ Add Panel Member</button>
+            </div>
+            <div id="faculty-container">
+              <div class="dynamic-row faculty-row">
+                <div class="form-group">
+                  <label>Faculty First Name <span class="req">*</span></label>
+                  <input type="text" name="faculty_first_name[]" placeholder="Gracie Anne" required>
+                </div>
+                <div class="form-group">
+                  <label>Faculty Last Name <span class="req">*</span></label>
+                  <input type="text" name="faculty_last_name[]" placeholder="Abot" required>
+                </div>
+                <div class="form-group">
+                  <label>Committee Role <span class="req">*</span></label>
+                  <select name="faculty_role[]" required>
+                    <option value="Adviser" selected>Adviser</option>
+                    <option value="Co-Adviser">Co-Adviser</option>
+                    <option value="Panel Member">Panel Member</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg">Submit Thesis for Admin Review</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         TAB 3: RESEARCH TRACKING & ANALYTICS DASHBOARD
+    ========================================================== -->
+    <section id="tab-analytics" class="tab-section">
+      <div class="section-title-block">
+        <h2>DMPCS Research Tracking &amp; Gap Overview</h2>
+        <p class="muted-text">Visual breakdown of archived theses across degree programs, research areas, and methodologies.</p>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="kpi-grid">
+        <div class="card kpi-card">
+          <span class="kpi-label">Total Archived Theses</span>
+          <strong id="kpi-total" class="kpi-value">0</strong>
+        </div>
+        <div class="card kpi-card">
+          <span class="kpi-label">BS Computer Science</span>
+          <strong id="kpi-bscs" class="kpi-value">0</strong>
+        </div>
+        <div class="card kpi-card">
+          <span class="kpi-label">BS Applied Mathematics</span>
+          <strong id="kpi-bsam" class="kpi-value">0</strong>
+        </div>
+        <div class="card kpi-card">
+          <span class="kpi-label">BS Data Science</span>
+          <strong id="kpi-bsds" class="kpi-value">0</strong>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="card">
+          <h3>Research Areas Distribution</h3>
+          <p class="muted-text small">Identify heavily studied domains vs. underexplored research gaps.</p>
+          <div id="area-bars" class="bar-list"></div>
+        </div>
+
+        <div class="card">
+          <h3>Top Methodologies Used</h3>
+          <p class="muted-text small">Commonly applied analytical and computational techniques.</p>
+          <div id="methodology-tags" class="tag-cloud"></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- =========================================================
+         TAB 4: ADMIN VERIFICATION PORTAL
+    ========================================================== -->
+    <section id="tab-admin" class="tab-section">
+      <div class="card">
+        <div class="section-title-block">
+          <h2>Admin Verification Queue</h2>
+          <p class="muted-text">Review student-submitted thesis entries before updating their status to <strong>Completed / Approved</strong> in the public archive.</p>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Title &amp; Abstract Preview</th>
+                <th>Program</th>
+                <th>Author(s)</th>
+                <th>Adviser</th>
+                <th>A.Y.</th>
+                <th>Status</th>
+                <th>Verification Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-queue-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- THESIS FULL DETAIL MODAL -->
+  <div id="thesis-modal" class="modal hidden">
+    <div class="modal-backdrop" id="modal-close-bg"></div>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <span id="modal-program-badge" class="program-pill">BS Computer Science</span>
+        <button type="button" id="modal-close-btn" class="close-btn">&times;</button>
+      </div>
+      <h2 id="modal-title">Thesis Title</h2>
+      <p id="modal-meta" class="modal-meta"></p>
+      
+      <div class="modal-section">
+        <h4>Abstract</h4>
+        <p id="modal-abstract" class="modal-abstract"></p>
+      </div>
+
+      <div class="modal-grid-2">
+        <div class="modal-section">
+          <h4>Student Authors</h4>
+          <ul id="modal-authors" class="detail-list"></ul>
+        </div>
+        <div class="modal-section">
+          <h4>Faculty Committee</h4>
+          <ul id="modal-faculty" class="detail-list"></ul>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h4>Classification &amp; Tags</h4>
+        <div id="modal-tags" class="tag-row"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast hidden"></div>
+
+  <footer class="footer">
+    <p>&copy; 2026 Department of Mathematics, Physics, and Computer Science &mdash; University of the Philippines Mindanao</p>
+  </footer>
+
 </body>
 </html>
